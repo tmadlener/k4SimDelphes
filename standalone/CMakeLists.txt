@@ -7,6 +7,14 @@ target_include_directories(PythiaEvtGen_Interface PRIVATE ${PYTHIA8_INCLUDE_DIRS
 target_link_libraries(PythiaEvtGen_Interface ${PYTHIA8_LIBRARIES} ${EVTGEN_LIBRARIES})
 install(TARGETS PythiaEvtGen_Interface DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
+option(BENCHMARK_INSTRUMENTATION "Add I/O benchmarking instrumentation to the standalone readers" OFF)
+
+if(BENCHMARK_INSTRUMENTATION)
+  message(STATUS "Adding I/O benchmarking instrumentation to the standalone readers")
+  # In priniple we would like to use add_compile_definitions, but that is only
+  # available from cmake 3.12
+  add_compile_options(-DBENCHMARK_INSTRUMENTATION=1)
+endif()
 
 # build executable and put it into bin/
 add_executable(DelphesROOT_EDM4HEP src/DelphesROOT_EDM4HEP.cpp)

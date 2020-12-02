@@ -1,9 +1,17 @@
+#ifndef BENCHMARK_INSTRUMENTATION
+#define BENCHMARK_INSTRUMENTATION 0
+#endif
+
 #include "DelphesInputReader.h"
 #include "k4SimDelphes/DelphesEDM4HepOutputConfiguration.h"
 #include "k4SimDelphes/DelphesEDM4HepConverter.h"
 
 #include "podio/EventStore.h"
 #include "podio/ROOTWriter.h"
+#if BENCHMARK_INSTRUMENTATION
+#include "podio/TimedWriter.h"
+#include "podio/BenchmarkRecorder.h"
+#endif
 
 #include "modules/Delphes.h"
 #include "ExRootAnalysis/ExRootConfReader.h"
@@ -48,7 +56,12 @@ int doit(int argc, char* argv[], DelphesInputReader& inputReader) {
     // Now that the converter is setup, we can also actually register the
     // collections with the EventStore and add them to the writer for output
     podio::EventStore eventStore;
+#if BENCHMARK_INSTRUMENTATION
+    podio::benchmark::BenchmarkRecorder benchmarkRecorder(outputFile + ".bench.root");
+    podio::TimedWriter<WriterT> podioWriter(benchmarkRecorder, outputFile, &eventStore);
+#else
     WriterT podioWriter(outputFile, &eventStore);
+#endif
     auto collections = edm4hepConverter.getCollections();
     for (auto& c: collections) {
       eventStore.registerCollection(std::string(c.first), c.second);
