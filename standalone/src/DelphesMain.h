@@ -21,6 +21,12 @@
 #include <signal.h>
 #include <iostream>
 #include <memory>
+#include <string_view>
+
+std::string_view getFileEnding(const char* filename) {
+  const auto festart = std::string_view(filename).rfind('.');
+  return std::string_view(filename).substr(festart);
+}
 
 static bool interrupted = false;
 void SignalHandler(int /*si*/) {
