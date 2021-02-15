@@ -65,6 +65,8 @@ int doit(int argc, char* argv[], DelphesInputReader& inputReader) {
 #if BENCHMARK_INSTRUMENTATION
     podio::benchmark::BenchmarkRecorder benchmarkRecorder(outputFile + ".bench.root");
     podio::TimedWriter<WriterT> podioWriter(benchmarkRecorder, outputFile, &eventStore);
+    auto& loopTree = benchmarkRecorder.addTree("non_io_times",
+                                               {"loop", "read", "process_delphes", "process_convert", "write"});
 #else
     WriterT podioWriter(outputFile, &eventStore);
 #endif
@@ -88,6 +90,9 @@ int doit(int argc, char* argv[], DelphesInputReader& inputReader) {
     for (Int_t entry = 0;
          !inputReader.finished() && (maxEvents > 0 ?  entry < maxEvents : true) && !interrupted;
          ++entry) {
+#if BENCHMARK_INSTRUMENTATION
+      const auto loopStartTime = podio::benchmark::ClockT::now();
+#endif
 
       if (!inputReader.readEvent(modularDelphes,
                                  allParticleOutputArray,
@@ -95,15 +100,34 @@ int doit(int argc, char* argv[], DelphesInputReader& inputReader) {
                                  partonOutputArray)) {
         break;
       }
-
+#if BENCHMARK_INSTRUMENTATION
+      const auto readEndTime = podio::benchmark::ClockT::now();
+#endif
       modularDelphes->ProcessTask();
+#if BENCHMARK_INSTRUMENTATION
+      const auto delphesProcessEndTime = podio::benchmark::ClockT::now();
+#endif
       edm4hepConverter.process(inputReader.converterTree());
+#if BENCHMARK_INSTRUMENTATION
+      const auto convertEndTime = podio::benchmark::ClockT::now();
+#endif
+
       podioWriter.writeEvent();
       eventStore.clearCollections();
 
       modularDelphes->Clear();
       progressBar.Update(eventCounter, eventCounter);
       eventCounter++;
+#if BENCHMARK_INSTRUMENTATION
+      const auto loopEndTime = podio::benchmark::ClockT::now();
+      loopTree.recordTime("loop", loopEndTime - loopStartTime);
+      loopTree.recordTime("read", readEndTime - loopStartTime);
+      loopTree.recordTime("process_delphes", delphesProcessEndTime - readEndTime);
+      loopTree.recordTime("process_convert", convertEndTime - delphesProcessEndTime);
+      loopTree.recordTime("write", loopEndTime - convertEndTime);
+      loopTree.Fill();
+#endif
+
     }
 
     progressBar.Update(eventCounter, eventCounter, true);
