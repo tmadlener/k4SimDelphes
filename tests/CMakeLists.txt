@@ -10,7 +10,7 @@ target_include_directories(compare_delphes_converter_outputs
   ${CMAKE_SOURCE_DIR}/converter/src #for delphesHelpers
   ${CMAKE_SOURCE_DIR}/converter/include
   )
-target_link_libraries(compare_delphes_converter_outputs PRIVATE EDM4HEP::edm4hep ${DELPHES_LIBRARY} podio::podioRootIO ROOT::Physics)
+target_link_libraries(compare_delphes_converter_outputs PRIVATE EDM4HEP::edm4hep EDM4HEP::utils ${DELPHES_LIBRARY} podio::podioRootIO ROOT::Physics)
 
 function(ADD_COMPARISON_TEST name converter)
   # Check if we have the standalone Delphes application available for the

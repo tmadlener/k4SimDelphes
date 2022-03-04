@@ -3,6 +3,7 @@
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/MCRecoParticleAssociationCollection.h"
 #include "edm4hep/ReconstructedParticleCollection.h"
+#include "edm4hep/utils/kinematics.h"
 
 #include "podio/EventStore.h"
 #include "podio/ROOTReader.h"
@@ -27,9 +28,11 @@
 template <typename DelphesT, typename EDM4HepT>
 bool compareKinematics(const DelphesT* delphesCand, const EDM4HepT& edm4hepCand) {
   using namespace k4SimDelphes;
+  using namespace edm4hep::utils;
   // Use the same matching criteria as in the converter: First try with all
   // components, if that doesn't work try again without the energy
-  return equalP4(delphesCand->P4(), getP4(edm4hepCand)) || equalP4(delphesCand->P4(), getP4(edm4hepCand), 1e-5, false);
+  return equalP4(delphesCand->P4(), p4(edm4hepCand, UseEnergy)) ||
+         equalP4(delphesCand->P4(), p4(edm4hepCand, UseEnergy), 1e-5, false);
 }
 
 /**

@@ -12,6 +12,7 @@ target_include_directories(DelphesEDM4HepConverter
 
 target_link_libraries(DelphesEDM4HepConverter
                         EDM4HEP::edm4hep
+                        EDM4HEP::utils
                         ${DELPHES_LIBRARY}
                         podio::podio
                         ROOT::MathCore

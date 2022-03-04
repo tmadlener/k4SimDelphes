@@ -8,6 +8,7 @@
 #include "edm4hep/ParticleIDCollection.h"
 #include "edm4hep/ReconstructedParticleCollection.h"
 #include "edm4hep/TrackCollection.h"
+#include "edm4hep/utils/kinematics.h"
 
 #include "classes/DelphesClasses.h"
 
@@ -378,7 +379,7 @@ namespace k4SimDelphes {
     for (const auto genId : getAllParticleIDs(delphesCand)) {
       const auto [recoBegin, recoEnd] = m_recoParticleGenIds.equal_range(genId);
       for (auto it = recoBegin; it != recoEnd; ++it) {
-        const auto edm4Mom = getP4(it->second);
+        const auto edm4Mom = edm4hep::utils::p4(it->second, edm4hep::utils::UseEnergy);
         if (equalP4(edm4Mom, delphes4Mom)) {
           return it->second;
         } else if (equalP4(edm4Mom, delphes4Mom, 1e-5, false)) {

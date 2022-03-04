@@ -14,16 +14,6 @@ namespace k4SimDelphes {
   // TODO: If CLHEP ever gets part of edm4hep, take this from there.
   static constexpr double c_light = 2.99792458e+8;
 
-  using LorentzVectorT = ROOT::Math::PxPyPzEVector;
-
-  /**
-   * Get the 4-momentum from an edm4hep type, using the momentum and the energy
-   */
-  template <typename T> inline LorentzVectorT getP4(const T& particle) {
-    return LorentzVectorT{particle.getMomentum()[0], particle.getMomentum()[1], particle.getMomentum()[2],
-                          particle.getEnergy()};
-  }
-
   namespace {
     /**
      * Combination of a relative and absolute comparison. The absolute comparison
